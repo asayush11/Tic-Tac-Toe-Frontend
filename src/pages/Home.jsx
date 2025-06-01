@@ -27,8 +27,10 @@ export default function Home() {
   };
 
   const handleJoin = () => {
+    const firstPlayer=true
     if (gameId && playerName) {
-      navigate(`/game/${gameId}?player=${playerName}`);
+      navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
+     // navigate(`/game/${gameId}?player=${playerName}?firstPlayer=${firstPlayer}`);
     }
   };
 

@@ -1,60 +1,73 @@
-// src/pages/Game.jsx
-import { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import SockJS from 'sockjs-client';
-import { CompatClient, Stomp } from '@stomp/stompjs';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Client } from '@stomp/stompjs';
 
 const BASE_URL = 'https://tic-tac-toe-backend-a7hj.onrender.com';
 
-export default function Game() {
-  const { gameId } = useParams();
-  const location = useLocation();
-  const playerName = new URLSearchParams(location.search).get('player');
-  const [gameState, setGameState] = useState(null);
+const Game = () => {
+  const { gameId, playerName, firstPlayer } = useParams();
+  const symbol = firstPlayer === "true" ? 'X' : 'O';
   const [client, setClient] = useState(null);
+  const [gameState, setGameState] = useState(null);
 
+  // Initialize WebSocket connection
   useEffect(() => {
-    fetch(`${BASE_URL}/game/join?gameId=${gameId}&playerName=${playerName}`, {
-      method: 'POST',
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to join game');
-        return res.json();
-      })
-      .then((data) => setGameState(data))
-      .catch((err) => alert(err.message));
-  }, [gameId, playerName]);
-
-  useEffect(() => {
-    const socket = new SockJS(`${BASE_URL}/ws/game`);
-    const stompClient = Stomp.over(socket);
-    stompClient.debug = null;
-
-    stompClient.connect({}, () => {
-      stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
-        const updatedState = JSON.parse(message.body);
-        setGameState(updatedState);
-      });
-      setClient(stompClient);
+    const newClient = new Client({
+      brokerURL: `${BASE_URL.replace(/^http/, 'ws')}/ws/game`,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        newClient.subscribe(`/topic/game/${gameId}`, (message) => {
+          const updatedState = JSON.parse(message.body);
+          setGameState(updatedState);
+        });
+      },
+      onStompError: (frame) => {
+        console.error('STOMP error', frame);
+      },
     });
 
+    newClient.activate();
+    setClient(newClient);
+
     return () => {
-      if (stompClient && stompClient.connected) {
-        stompClient.disconnect();
-      }
+      newClient.deactivate();
     };
   }, [gameId]);
 
-  const handleClick = (index) => {
-    if (!client || !client.connected || !gameState || gameState.board[index]) return;
-    const payload = {
-      gameId: gameId,
-      playerName: playerName,
-      position: index,
+  // Fetch initial game state
+  useEffect(() => {
+    const fetchState = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/game/state/${gameId}`);
+        const data = await res.json();
+        setGameState(data);
+      } catch (err) {
+        console.error('Error fetching game state:', err);
+      }
     };
+
+    fetchState();
+  }, [gameId]);
+
+  const handleClick = (row, col) => {
+    if (!client || !playerName) {
+      alert('Please enter your name to play.');
+      return;
+    }
+    if (gameState.currentTurn !== symbol) {
+      alert('Please wait, not your turn.');
+      return;
+    }
+
     client.publish({
       destination: '/app/play',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        gameId,
+        playerName,
+        symbol,
+        row,
+        col,
+      }),
     });
   };
 
@@ -62,26 +75,32 @@ export default function Game() {
 
   return (
     <div>
-      <h1>Tic-Tac-Toe</h1>
-      <h2>Player: {playerName}</h2>
+      <h2>Hi {playerName}, you are assigned the symbol: {symbol}</h2>
       <h3>
-        {gameState.isDraw
-          ? 'Draw!'
+        {gameState.draw
+          ? 'Game Draw!'
           : gameState.winner
           ? `Winner: ${gameState.winner}`
           : `Turn: ${gameState.currentTurn}`}
       </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 100px)', gap: '5px' }}>
-        {gameState.board.map((cell, index) => (
-          <button
-            key={index}
-            onClick={() => handleClick(index)}
-            style={{ width: '100px', height: '100px', fontSize: '2rem' }}
-          >
-            {cell}
-          </button>
+      <div className="board">
+        {gameState?.board?.map((row, rowIndex) => (
+          <div key={rowIndex} className="row">
+            {row.map((cell, colIndex) => (
+              <button
+                key={colIndex}
+                className="cell"
+                onClick={() => handleClick(rowIndex, colIndex)}
+              >
+                {cell}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
+      {gameState?.winner && <h3>Winner: {gameState.winner}</h3>}
     </div>
   );
-}
+};
+
+export default Game;

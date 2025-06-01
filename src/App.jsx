@@ -8,7 +8,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/friend/:gameId" element={<Home2 />} />
-      <Route path="/game/:gameId" element={<Game />} />
+      <Route path="/game/:gameId/:playerName/:firstPlayer" element={<Game />} />
     </Routes>
   );
 }
