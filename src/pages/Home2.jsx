@@ -11,6 +11,14 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleJoin = async () => {
+    if (playerName.trim() === '') {
+      alert('Please enter a valid name to join the game.');
+      return;
+    }
+    if(playerName === invitee) {
+      alert('You cannot join the game with the same name as the invitee.');
+      return;
+    }
     try {
       const response = await fetch(`${BASE_URL}/game/join?gameId=${gameId}&playerName=${playerName}`, {
         method: 'POST',

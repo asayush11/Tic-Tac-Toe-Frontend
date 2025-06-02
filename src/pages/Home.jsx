@@ -11,11 +11,15 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleStartGame = async () => {
+    if(playerName.trim() === '') {
+      alert('Please enter a valid name to start the game.');
+      return;
+    }
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
     controller.abort();
-    alert('Request timed out, Server might be down.... Please try again later.');
-    }, 10000); // 10 seconds timeout
+    alert('Oops! Server is booting up.... Please try again after 60 seconds.');
+    }, 5000); // 5 seconds timeout
     try {
       const response = await fetch(`${BASE_URL}/game/create?playerName=${playerName}`, {
         method: 'POST',
@@ -32,7 +36,7 @@ export default function Home() {
       const newLink = `${window.location.origin}/friend/${newGameId}/${playerName}`;
       setLink(newLink);
     } catch (err) {
-      alert("Something went wrong: " + err.message);
+      console.log("Something went wrong: " + err.message);
     }
   };
 
