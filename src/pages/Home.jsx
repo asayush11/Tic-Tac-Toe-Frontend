@@ -11,12 +11,19 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleStartGame = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+    controller.abort();
+    alert('Request timed out, Server might be down.... Please try again later.');
+    }, 10000); // 10 seconds timeout
     try {
       const response = await fetch(`${BASE_URL}/game/create?playerName=${playerName}`, {
         method: 'POST',
+        signal: controller.signal, // Pass the abort signal to the fetch request
       });
+      clearTimeout(timeoutId); // Clear the timeout if the request completes in time
       if (!response.ok) {
-        alert('Failed to start game, Server might be down.... Please try again later.');
+        alert('Failed to start game.... Please try again later.');
         return;
       }
       const data = await response.json();
