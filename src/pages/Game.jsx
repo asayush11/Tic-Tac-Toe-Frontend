@@ -41,12 +41,12 @@ const Game = () => {
     const fetchState = async () => {
       try {
         const res = await fetch(`${BASE_URL}/game/state/${gameId}`);
-        const data = await res.json();
-        if(!data) {
+        if(!res.ok) {
           alert('Game has ended.');
           navigate('/');
           return;
         }
+        const data = await res.json();
         setGameState(data);
       } catch (err) {
         console.error('Error fetching game state:', err);
