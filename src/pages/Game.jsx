@@ -42,6 +42,11 @@ const Game = () => {
       try {
         const res = await fetch(`${BASE_URL}/game/state/${gameId}`);
         const data = await res.json();
+        if(!data) {
+          alert('Game has ended.');
+          navigate('/');
+          return;
+        }
         setGameState(data);
       } catch (err) {
         console.error('Error fetching game state:', err);
