@@ -15,7 +15,7 @@ export default function Home() {
       const response = await fetch(`${BASE_URL}/game/create?playerName=${playerName}`, {
         method: 'POST',
       });
-      if (!response.ok) throw new Error('Failed to start game');
+      if (!response.ok) throw new Error('Failed to start game, Server might be down.... Please try again later.');
       const data = await response.json();
       const newGameId = data.gameId;
       setGameId(newGameId);
