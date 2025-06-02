@@ -15,14 +15,17 @@ export default function Home() {
       const response = await fetch(`${BASE_URL}/game/create?playerName=${playerName}`, {
         method: 'POST',
       });
-      if (!response.ok) throw new Error('Failed to start game, Server might be down.... Please try again later.');
+      if (!response.ok) {
+        alert('Failed to start game, Server might be down.... Please try again later.');
+        return;
+      }
       const data = await response.json();
       const newGameId = data.gameId;
       setGameId(newGameId);
       const newLink = `${window.location.origin}/friend/${newGameId}/${playerName}`;
       setLink(newLink);
     } catch (err) {
-      alert(err.message);
+      alert("Something went wrong: " + err.message);
     }
   };
 
