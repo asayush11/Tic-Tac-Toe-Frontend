@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
+import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = 'https://tic-tac-toe-backend-a7hj.onrender.com';
 
@@ -9,6 +10,7 @@ const Game = () => {
   const symbol = firstPlayer === "true" ? 'X' : 'O';
   const [client, setClient] = useState(null);
   const [gameState, setGameState] = useState(null);
+  const navigate = useNavigate();
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -50,12 +52,20 @@ const Game = () => {
   }, [gameId]);
 
   const handleClick = (row, col) => {
-    if (!client || !playerName) {
+    if(!client) {
+      alert('WebSocket connection not established.');
+      return;
+    }
+    if (!playerName) {
       alert('Please enter your name to play.');
       return;
     }
     if (gameState.currentTurn !== symbol) {
       alert('Please wait, not your turn.');
+      return;
+    }
+    if(gameState.board[row][col] !== '') {
+      alert('Invalid move, choose another cell.');
       return;
     }
 
@@ -80,7 +90,7 @@ const Game = () => {
         {gameState.draw
           ? 'Game Draw!'
           : gameState.winner
-          ? `Winner: ${gameState.winner}`
+          ? `Game Ended, Winner: ${gameState.winner}`
           : `Turn: ${gameState.currentTurn}`}
       </h3>
       <div className="board">
@@ -98,7 +108,11 @@ const Game = () => {
           </div>
         ))}
       </div>
-      {gameState?.winner && <h3>Winner: {gameState.winner}</h3>}
+      {gameState?.winner && gameState.winner === playerName && <h3>Congratulations {gameState.winner}!</h3>}
+      {gameState?.winner && gameState.winner !== playerName && <h3>Oops, Keep Trying {playerName}!</h3>}
+      {gameState?.draw || gameState?.winner ? (
+        <button onClick={() => navigate(`/`)}>Restart Game</button>
+      ) : null}
     </div>
   );
 };

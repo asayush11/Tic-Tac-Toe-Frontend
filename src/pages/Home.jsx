@@ -19,7 +19,7 @@ export default function Home() {
       const data = await response.json();
       const newGameId = data.gameId;
       setGameId(newGameId);
-      const newLink = `${window.location.origin}/friend/${newGameId}`;
+      const newLink = `${window.location.origin}/friend/${newGameId}/${playerName}`;
       setLink(newLink);
     } catch (err) {
       alert(err.message);
@@ -30,11 +30,38 @@ export default function Home() {
     const firstPlayer=true
     if (gameId && playerName) {
       navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
-     // navigate(`/game/${gameId}?player=${playerName}?firstPlayer=${firstPlayer}`);
     }
   };
 
-  return (
+  if(link === '') {
+    return (
+      <div>
+        <h1>Welcome to Tic-Tac-Toe</h1>
+        <p>Please enter your name to start a new game</p>
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+        />
+        <br />
+        <button onClick={handleStartGame}>Start Game</button>
+      </div>
+    );
+  }
+
+  if (gameId) {
+    return (
+      <div>
+        <h1>Game Created!</h1>
+        <p>Share this link with your friend: <a href={link}>{link}</a></p>
+        <button onClick={handleJoin}>Enter Game</button>
+      </div>
+    );
+  }
+
+
+ /* return (
     <div>
       <h1>Start a Tic-Tac-Toe Game</h1>
       <input
@@ -52,5 +79,5 @@ export default function Home() {
         </div>
       )}
     </div>
-  );
+  );*/
 }
