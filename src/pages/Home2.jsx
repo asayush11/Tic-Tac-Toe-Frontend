@@ -38,7 +38,7 @@ export default function Home() {
         navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
       }
     } catch (err) {
-      alert(err.message);
+      console.log(err.message);
     }
     
   };
