@@ -15,7 +15,7 @@ export default function Home() {
       alert('Please enter a valid name to join the game.');
       return;
     }
-    if(playerName === invitee) {
+    if(playerName.trim() === invitee.trim()) {
       alert('You cannot join the game with the same name as the invitee.');
       return;
     }
