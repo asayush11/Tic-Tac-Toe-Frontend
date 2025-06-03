@@ -19,18 +19,28 @@ export default function Home() {
       alert('You cannot join the game with the same name as the invitee.');
       return;
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+    controller.abort();
+      alert('Game has ended.');
+          navigate('/');
+          return;
+    }, 3000); // 3 seconds timeout
     try {
       const response = await fetch(`${BASE_URL}/game/join?gameId=${gameId}&playerName=${playerName}`, {
         method: 'POST',
+        signal: controller.signal, // Pass the abort signal to the fetch request
       });
+      clearTimeout(timeoutId); // Clear the timeout if the request completes in time
       if (!response.ok) throw new Error('Failed to join game');
+      const firstPlayer=false;
+      if (gameId && playerName) {
+        navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
+      }
     } catch (err) {
       alert(err.message);
     }
-    const firstPlayer=false;
-    if (gameId && playerName) {
-      navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
-    }
+    
   };
 
   return (
