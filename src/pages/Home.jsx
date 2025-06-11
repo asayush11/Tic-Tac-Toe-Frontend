@@ -28,7 +28,7 @@ export default function Home() {
       });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
       if (!response.ok) {
-        toast.error('Failed to start game.... Please try again later.');
+        toast.error('No game room available.... Please try again later.');
         return;
       }
       const data = await response.json();

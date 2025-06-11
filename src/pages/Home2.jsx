@@ -33,7 +33,11 @@ export default function Home() {
         signal: controller.signal, // Pass the abort signal to the fetch request
       });
       clearTimeout(timeoutId); // Clear the timeout if the request completes in time
-      if (!response.ok) throw new Error('Game has ended or does not exist.');
+      if (!response.ok) {
+       toast.error('Game has ended.'); 
+       navigate('/');
+       return;
+      }
       const firstPlayer=false;
       if (gameId && playerName) {
         navigate(`/game/${gameId}/${playerName}/${firstPlayer}`);
